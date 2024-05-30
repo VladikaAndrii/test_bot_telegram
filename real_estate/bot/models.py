@@ -10,3 +10,6 @@ class UserInfo(models.Model):
         ('rent', 'Здати квартиру'),
     ]
     option = models.CharField(max_length=4, choices=CHOICES)
+    price = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
+

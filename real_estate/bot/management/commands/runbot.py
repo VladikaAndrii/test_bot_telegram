@@ -6,7 +6,7 @@ from django.conf import settings
 from bot.models import UserInfo
 from asgiref.sync import sync_to_async
 
-PHONE_NUMBER, NAME, OPTION = range(3)
+PHONE_NUMBER, NAME, OPTION, PRICE, LOCATION, SUMMARY = range(6)
 
 
 async def start(update: Update, context: CallbackContext) -> int:
@@ -29,13 +29,37 @@ async def name(update: Update, context: CallbackContext) -> int:
 
 
 async def option(update: Update, context: CallbackContext) -> int:
-    user_info = UserInfo(
-        phone_number=context.user_data['phone_number'],
-        name=context.user_data['name'],
-        option='sell' if update.message.text == 'Продати квартиру' else 'rent'
-    )
-    await sync_to_async(user_info.save)()
+    context.user_data['option'] = update.message.text
+    await update.message.reply_text('Введіть ціну:')
+    return PRICE
+
+
+async def price(update: Update, context: CallbackContext) -> int:
+    context.user_data['price'] = update.message.text
+    await update.message.reply_text('Введіть локацію:')
+    return LOCATION
+
+
+async def location(update: Update, context: CallbackContext) -> int:
+    context.user_data['location'] = update.message.text
     await update.message.reply_text('Ваші дані збережено!')
+    options = [['Показати дані', ]]
+    reply_markup = ReplyKeyboardMarkup(options, one_time_keyboard=True)
+    await update.message.reply_text('Оберіть дію:', reply_markup=reply_markup)
+    return SUMMARY
+
+
+async def summary(update: Update, context: CallbackContext) -> int:
+    phone = context.user_data['phone_number']
+    name = context.user_data['name']
+    option = context.user_data["option"]
+    price = context.user_data["price"]
+    location = context.user_data["location"]
+    await update.message.reply_text(f"Номер телефону - {phone},\n"
+                                    f"Імя - {name},\n"
+                                    f"Опція - {option},\n"
+                                    f"Ціна - {price},\n"
+                                    f"Локація - {location}")
     return ConversationHandler.END
 
 
@@ -56,6 +80,9 @@ class Command(BaseCommand):
                 PHONE_NUMBER: [MessageHandler(filters.TEXT & ~filters.COMMAND, phone_number)],
                 NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, name)],
                 OPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, option)],
+                PRICE: [MessageHandler(filters.TEXT & ~filters.COMMAND, price)],
+                LOCATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, location)],
+                SUMMARY: [MessageHandler(filters.TEXT & ~filters.COMMAND, summary)]
             },
             fallbacks=[CommandHandler('cancel', cancel)],
         )
@@ -63,4 +90,3 @@ class Command(BaseCommand):
         application.add_handler(conv_handler)
 
         application.run_polling(allowed_updates=Update.ALL_TYPES)
-        # updater.idle()

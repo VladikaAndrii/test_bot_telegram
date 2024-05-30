@@ -3,8 +3,8 @@ from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import CommandHandler, MessageHandler, filters, CallbackContext, ConversationHandler, \
     Application
 from django.conf import settings
-from bot.models import UserInfo
-from asgiref.sync import sync_to_async
+# from bot.models import UserInfo
+# from asgiref.sync import sync_to_async
 
 PHONE_NUMBER, NAME, OPTION, PRICE, LOCATION, SUMMARY = range(6)
 

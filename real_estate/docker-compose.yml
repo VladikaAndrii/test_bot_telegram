@@ -1,0 +1,49 @@
+version: '3.7'
+
+services:
+  db:
+    image: 'postgres:latest'
+    container_name: postgres_service
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - service_data:/var/lib/postgresql/data/
+    networks:
+      - django_network
+
+  web:
+    restart: always
+    build: .
+    container_name: backend_service
+    command: ["/entrypoint.sh"]
+    environment:
+      - PYTHONUNBUFFERED=True
+    env_file:
+      - .env
+#    volumes:
+#      - core_log:/core/log
+    #  - .:/code
+    links:
+      - db:db
+    depends_on:
+      - db
+    networks:
+      - django_network
+
+  bot:
+    restart: on-failure
+    build:
+      context: /bot
+    env_file:
+      - bot/.bot_env
+
+volumes:
+  service_data:
+    driver: local
+
+networks:
+  django_network:
+    driver: bridge

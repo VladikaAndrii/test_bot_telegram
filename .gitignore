@@ -1,0 +1,4 @@
+.venv
+.idea
+real_estate/.env
+real_estate/bot/.bot_env

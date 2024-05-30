@@ -19,4 +19,7 @@ python manage.py migrate
 #    user = User.objects.create_superuser('admin@example.com', 'admin')
 #EOF
 
-gunicorn -c gunicorn.py core.wsgi:application
+#python manage.py runserver 0.0.0.0:8000
+echo Starting bot
+python manage.py runbot
+echo Starting bot success

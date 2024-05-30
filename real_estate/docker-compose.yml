@@ -33,13 +33,6 @@ services:
     networks:
       - django_network
 
-  bot:
-    restart: on-failure
-    build:
-      context: /bot
-    env_file:
-      - bot/.bot_env
-
 volumes:
   service_data:
     driver: local
